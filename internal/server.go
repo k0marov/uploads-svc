@@ -43,8 +43,8 @@ func (s *Server) HandleUpload(c *gin.Context) {
 	}
 	gotFile, err := c.FormFile("file")
 	if err != nil {
-		if _, ok := err.(*http.MaxBytesError); ok {
-			err = ErrTooBigFile
+		if maxBytesErr, ok := err.(*http.MaxBytesError); ok {
+			err = ErrTooBigFile(maxBytesErr.Limit / 1024 / 1024)
 		} else if errors.Is(err, http.ErrMissingFile) {
 			err = ErrNoFileProvided
 		}

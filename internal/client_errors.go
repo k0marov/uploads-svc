@@ -27,9 +27,11 @@ var ErrInvalidContentType = &ClientError{
 	HTTPCode:       http.StatusBadRequest,
 }
 
-var ErrTooBigFile = &ClientError{
-	DisplayMessage: "file is too big", // TODO: add max file size to display message
-	HTTPCode:       http.StatusRequestEntityTooLarge,
+func ErrTooBigFile(maxSizeMB int64) *ClientError {
+	return &ClientError{
+		DisplayMessage: fmt.Sprintf("file is too big. Max file size is %dMB", maxSizeMB),
+		HTTPCode:       http.StatusRequestEntityTooLarge,
+	}
 }
 
 func WriteErrorResponse(w http.ResponseWriter, e error) {
