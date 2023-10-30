@@ -22,6 +22,11 @@ var ErrNoFileProvided = &ClientError{
 	HTTPCode:       http.StatusBadRequest,
 }
 
+var ErrInvalidContentType = &ClientError{
+	DisplayMessage: "request content type must be 'multipart/form-data'",
+	HTTPCode:       http.StatusBadRequest,
+}
+
 var ErrTooBigFile = &ClientError{
 	DisplayMessage: "file is too big", // TODO: add max file size to display message
 	HTTPCode:       http.StatusRequestEntityTooLarge,

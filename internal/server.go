@@ -34,6 +34,10 @@ func (s *Server) defineEndpoints() {
 }
 
 func (s *Server) HandleUpload(c *gin.Context) {
+	if c.ContentType() != "multipart/form-data" {
+		WriteErrorResponse(c.Writer, ErrInvalidContentType)
+		return
+	}
 	gotFile, err := c.FormFile("file")
 	if err != nil {
 		if errors.Is(err, multipart.ErrMessageTooLarge) {
