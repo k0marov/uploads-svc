@@ -27,9 +27,9 @@ func NewServer(storage INamingService) http.Handler {
 }
 
 func (s *Server) defineEndpoints() {
-	group := s.r.Group("/api/v1/upload")
-	group.POST("/", s.HandleUpload)
+	group := s.r.Group("/api/v1/uploads")
 	group.GET("/:name", s.GetFileByName)
+	group.POST("/", s.HandleUpload)
 }
 
 func (s *Server) HandleUpload(c *gin.Context) {
