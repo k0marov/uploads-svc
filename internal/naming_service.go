@@ -26,3 +26,7 @@ func (n *NamingService) GetFullFSPath(filename string) string {
 func (n *NamingService) GetURL(filename string) string {
 	return n.cfg.WebURLRoot + filename
 }
+
+func (n *NamingService) FSRoot() string {
+	return n.cfg.FSRoot
+}

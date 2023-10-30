@@ -8,10 +8,11 @@ import (
 )
 
 type INamingService interface {
-	// GetNewFilename uses uploadedFilename to preserve extension, if possible
+	// GetNewFilename uses uploadedFilename to preserve extension if possible
 	GetNewFilename(uploadedFilename string) string
 	GetFullFSPath(filename string) string
 	GetURL(filename string) string
+	FSRoot() string
 }
 
 type Server struct {
@@ -28,20 +29,19 @@ func NewServer(storage INamingService) http.Handler {
 
 func (s *Server) defineEndpoints() {
 	group := s.r.Group("/api/v1/uploads")
-	group.GET("/:name", s.GetFileByName)
 	group.POST("/", s.HandleUpload)
+	group.Static("/", s.namer.FSRoot())
 }
 
 func (s *Server) HandleUpload(c *gin.Context) {
 	gotFile, err := c.FormFile("file")
 	if err != nil {
 		if errors.Is(err, multipart.ErrMessageTooLarge) {
-			WriteErrorResponse(c.Writer, ErrTooBigFile)
+			err = ErrTooBigFile
 		} else if errors.Is(err, http.ErrMissingFile) {
-			WriteErrorResponse(c.Writer, ErrNoFileProvided)
-		} else {
-			WriteErrorResponse(c.Writer, err)
+			err = ErrNoFileProvided
 		}
+		WriteErrorResponse(c.Writer, err)
 		return
 	}
 	newFilename := s.namer.GetNewFilename(gotFile.Filename)
@@ -51,10 +51,6 @@ func (s *Server) HandleUpload(c *gin.Context) {
 		return
 	}
 	c.String(http.StatusCreated, s.namer.GetURL(newFilename))
-}
-
-func (s *Server) GetFileByName(c *gin.Context) {
-	// TODO: implement GetFileByName
 }
 
 func (s *Server) ServeHTTP(w http.ResponseWriter, r *http.Request) {
