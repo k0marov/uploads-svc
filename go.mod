@@ -1,4 +1,4 @@
-module gitlab.com/samkomarov/upload-svc.git
+module gitlab.com/samkomarov/uploads-svc.git
 
 go 1.21
 

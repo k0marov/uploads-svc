@@ -21,7 +21,7 @@ type AppConfig struct {
 
 func ReadConfigFromEnv() AppConfig {
 	var cfg AppConfig
-	err := envconfig.Process("upload", &cfg)
+	err := envconfig.Process("uploads", &cfg)
 	if err != nil {
 		log.Panicf("while parsing app config from env: %v", err)
 	}

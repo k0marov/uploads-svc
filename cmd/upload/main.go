@@ -1,6 +1,6 @@
 package main
 
-import "gitlab.com/samkomarov/upload-svc.git/internal"
+import "gitlab.com/samkomarov/uploads-svc.git/internal"
 
 func main() {
 	cfg := internal.ReadConfigFromEnv()
