@@ -6,7 +6,7 @@ import (
 	"net/http"
 )
 
-type INamingService interface {
+type IUploadService interface {
 	// GetNewFilename uses uploadedFilename to preserve extension if possible
 	GetNewFilename(uploadedFilename string) string
 	GetFullFSPath(filename string) string
@@ -16,11 +16,11 @@ type INamingService interface {
 
 type Server struct {
 	r                *gin.Engine
-	namer            INamingService
+	svc              IUploadService
 	maxFileSizeBytes int64
 }
 
-func NewServer(storage INamingService, maxFileSizeMB int64) http.Handler {
+func NewServer(storage IUploadService, maxFileSizeMB int64) http.Handler {
 	maxFileSizeBytes := maxFileSizeMB << 20 // convert to bytes
 	srv := &Server{gin.New(), storage, maxFileSizeBytes}
 	srv.defineEndpoints()
@@ -30,7 +30,7 @@ func NewServer(storage INamingService, maxFileSizeMB int64) http.Handler {
 func (s *Server) defineEndpoints() {
 	group := s.r.Group("/api/v1/uploads")
 	group.POST("/", s.HandleUpload)
-	group.Static("/", s.namer.FSRoot())
+	group.Static("/", s.svc.FSRoot())
 }
 
 func (s *Server) HandleUpload(c *gin.Context) {
@@ -51,13 +51,13 @@ func (s *Server) HandleUpload(c *gin.Context) {
 		WriteErrorResponse(c.Writer, err)
 		return
 	}
-	newFilename := s.namer.GetNewFilename(gotFile.Filename)
-	err = c.SaveUploadedFile(gotFile, s.namer.GetFullFSPath(newFilename))
+	newFilename := s.svc.GetNewFilename(gotFile.Filename)
+	err = c.SaveUploadedFile(gotFile, s.svc.GetFullFSPath(newFilename))
 	if err != nil {
 		WriteErrorResponse(c.Writer, err)
 		return
 	}
-	c.String(http.StatusCreated, s.namer.GetURL(newFilename))
+	c.String(http.StatusCreated, s.svc.GetURL(newFilename))
 }
 
 func (s *Server) ServeHTTP(w http.ResponseWriter, r *http.Request) {
