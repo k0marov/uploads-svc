@@ -1,23 +1,32 @@
 package internal
 
 import (
+	"github.com/gin-gonic/gin"
 	"net/http"
 )
-import "github.com/go-chi/chi/v5"
 
 type Server struct {
-	r chi.Router
+	r *gin.Engine
 }
 
 func NewServer() http.Handler {
-	srv := &Server{chi.NewRouter()}
+	srv := &Server{gin.New()}
 	srv.defineEndpoints()
 	return srv
 }
 
 func (s *Server) defineEndpoints() {
-	s.r.Route("/api/v1/upload", func(r chi.Router) {
-	})
+	group := s.r.Group("/api/v1/upload")
+	group.POST("/", s.HandleUpload)
+	group.GET("/:id", s.GetFileById)
+}
+
+func (s *Server) HandleUpload(c *gin.Context) {
+	// TODO: implement HandleUpload
+}
+
+func (s *Server) GetFileById(c *gin.Context) {
+	// TODO: implement GetFileById
 }
 
 func (s *Server) ServeHTTP(w http.ResponseWriter, r *http.Request) {
