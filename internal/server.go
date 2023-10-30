@@ -12,17 +12,17 @@ type IUploadService interface {
 	GetFullFSPath(filename string) string
 	GetURL(filename string) string
 	FSRoot() string
+	MaxFileSizeBytes() int64
+	MakeErrTooBigFile() error
 }
 
 type Server struct {
-	r                *gin.Engine
-	svc              IUploadService
-	maxFileSizeBytes int64
+	r   *gin.Engine
+	svc IUploadService
 }
 
-func NewServer(storage IUploadService, maxFileSizeMB int64) http.Handler {
-	maxFileSizeBytes := maxFileSizeMB << 20 // convert to bytes
-	srv := &Server{gin.New(), storage, maxFileSizeBytes}
+func NewServer(svc IUploadService) http.Handler {
+	srv := &Server{gin.New(), svc}
 	srv.defineEndpoints()
 	return srv
 }
@@ -35,7 +35,7 @@ func (s *Server) defineEndpoints() {
 
 func (s *Server) HandleUpload(c *gin.Context) {
 	// limits request size
-	c.Request.Body = http.MaxBytesReader(c.Writer, c.Request.Body, s.maxFileSizeBytes)
+	c.Request.Body = http.MaxBytesReader(c.Writer, c.Request.Body, s.svc.MaxFileSizeBytes())
 
 	if c.ContentType() != "multipart/form-data" {
 		WriteErrorResponse(c.Writer, ErrInvalidContentType)
@@ -43,8 +43,8 @@ func (s *Server) HandleUpload(c *gin.Context) {
 	}
 	gotFile, err := c.FormFile("file")
 	if err != nil {
-		if maxBytesErr, ok := err.(*http.MaxBytesError); ok {
-			err = ErrTooBigFile(maxBytesErr.Limit / 1024 / 1024)
+		if _, ok := err.(*http.MaxBytesError); ok {
+			err = s.svc.MakeErrTooBigFile()
 		} else if errors.Is(err, http.ErrMissingFile) {
 			err = ErrNoFileProvided
 		}

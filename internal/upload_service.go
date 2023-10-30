@@ -6,27 +6,36 @@ import (
 )
 
 type UploadService struct {
-	cfg NamingConfig
+	cfg           NamingConfig
+	maxFileSizeMB int64
 }
 
-func NewUploadService(cfg NamingConfig) *UploadService {
-	return &UploadService{cfg}
+func NewUploadService(cfg NamingConfig, maxFileSizeMB int64) *UploadService {
+	return &UploadService{cfg, maxFileSizeMB}
 }
 
-func (n *UploadService) GetNewFilename(uploadedFilename string) string {
+func (u *UploadService) GetNewFilename(uploadedFilename string) string {
 	randomName := uuid.New().String()
 	fullName := randomName + filepath.Ext(uploadedFilename)
 	return fullName
 }
 
-func (n *UploadService) GetFullFSPath(filename string) string {
-	return filepath.Join(n.cfg.FSRoot, filename)
+func (u *UploadService) GetFullFSPath(filename string) string {
+	return filepath.Join(u.cfg.FSRoot, filename)
 }
 
-func (n *UploadService) GetURL(filename string) string {
-	return n.cfg.WebURLRoot + filename
+func (u *UploadService) GetURL(filename string) string {
+	return u.cfg.WebURLRoot + filename
 }
 
-func (n *UploadService) FSRoot() string {
-	return n.cfg.FSRoot
+func (u *UploadService) FSRoot() string {
+	return u.cfg.FSRoot
+}
+
+func (u *UploadService) MaxFileSizeBytes() int64 {
+	return u.maxFileSizeMB * 1024 * 1024
+}
+
+func (u *UploadService) MakeErrTooBigFile() error {
+	return ErrTooBigFile(u.maxFileSizeMB)
 }
