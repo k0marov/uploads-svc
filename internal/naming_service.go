@@ -24,6 +24,5 @@ func (n *NamingService) GetFullFSPath(filename string) string {
 }
 
 func (n *NamingService) GetURL(filename string) string {
-	//TODO implement me
-	panic("implement me")
+	return n.cfg.WebURLRoot + filename
 }
