@@ -15,8 +15,9 @@ type NamingConfig struct {
 }
 
 type AppConfig struct {
-	HTTPServer HTTPServerConfig
-	Naming     NamingConfig
+	HTTPServer    HTTPServerConfig
+	Naming        NamingConfig
+	MaxFileSizeMB int64 `default:"10"`
 }
 
 func ReadConfigFromEnv() AppConfig {

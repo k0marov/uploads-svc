@@ -3,7 +3,6 @@ package internal
 import (
 	"errors"
 	"github.com/gin-gonic/gin"
-	"mime/multipart"
 	"net/http"
 )
 
@@ -16,13 +15,14 @@ type INamingService interface {
 }
 
 type Server struct {
-	r     *gin.Engine
-	namer INamingService
+	r                *gin.Engine
+	namer            INamingService
+	maxFileSizeBytes int64
 }
 
-func NewServer(storage INamingService) http.Handler {
-	srv := &Server{gin.New(), storage}
-	//srv.r.MaxMultipartMemory = 8 << 20 // 8 MiB
+func NewServer(storage INamingService, maxFileSizeMB int64) http.Handler {
+	maxFileSizeBytes := maxFileSizeMB << 20 // convert to bytes
+	srv := &Server{gin.New(), storage, maxFileSizeBytes}
 	srv.defineEndpoints()
 	return srv
 }
@@ -34,13 +34,16 @@ func (s *Server) defineEndpoints() {
 }
 
 func (s *Server) HandleUpload(c *gin.Context) {
+	// limits request size
+	c.Request.Body = http.MaxBytesReader(c.Writer, c.Request.Body, s.maxFileSizeBytes)
+
 	if c.ContentType() != "multipart/form-data" {
 		WriteErrorResponse(c.Writer, ErrInvalidContentType)
 		return
 	}
 	gotFile, err := c.FormFile("file")
 	if err != nil {
-		if errors.Is(err, multipart.ErrMessageTooLarge) {
+		if _, ok := err.(*http.MaxBytesError); ok {
 			err = ErrTooBigFile
 		} else if errors.Is(err, http.ErrMissingFile) {
 			err = ErrNoFileProvided
