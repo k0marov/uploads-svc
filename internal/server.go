@@ -1,16 +1,27 @@
 package internal
 
 import (
+	"errors"
 	"github.com/gin-gonic/gin"
+	"mime/multipart"
 	"net/http"
 )
 
-type Server struct {
-	r *gin.Engine
+type StorageService interface {
+	// GetNewFilename uses uploadedFilename to preserve extension, if possible
+	GetNewFilename(uploadedFilename string) string
+	GetFullFSPath(filename string) string
+	GetURL(filename string) string
 }
 
-func NewServer() http.Handler {
-	srv := &Server{gin.New()}
+type Server struct {
+	r       *gin.Engine
+	storage StorageService
+}
+
+func NewServer(storage StorageService) http.Handler {
+	srv := &Server{gin.New(), storage}
+	//srv.r.MaxMultipartMemory = 8 << 20 // 8 MiB
 	srv.defineEndpoints()
 	return srv
 }
@@ -18,15 +29,32 @@ func NewServer() http.Handler {
 func (s *Server) defineEndpoints() {
 	group := s.r.Group("/api/v1/upload")
 	group.POST("/", s.HandleUpload)
-	group.GET("/:id", s.GetFileById)
+	group.GET("/:name", s.GetFileByName)
 }
 
 func (s *Server) HandleUpload(c *gin.Context) {
-	// TODO: implement HandleUpload
+	gotFile, err := c.FormFile("file")
+	if err != nil {
+		if errors.Is(err, multipart.ErrMessageTooLarge) {
+			WriteErrorResponse(c.Writer, ErrTooBigFile)
+		} else if errors.Is(err, http.ErrMissingFile) {
+			WriteErrorResponse(c.Writer, ErrNoFileProvided)
+		} else {
+			WriteErrorResponse(c.Writer, err)
+		}
+		return
+	}
+	newFilename := s.storage.GetNewFilename(gotFile.Filename)
+	err = c.SaveUploadedFile(gotFile, s.storage.GetFullFSPath(newFilename))
+	if err != nil {
+		WriteErrorResponse(c.Writer, err)
+		return
+	}
+	c.String(http.StatusCreated, s.storage.GetURL(newFilename))
 }
 
-func (s *Server) GetFileById(c *gin.Context) {
-	// TODO: implement GetFileById
+func (s *Server) GetFileByName(c *gin.Context) {
+	// TODO: implement GetFileByName
 }
 
 func (s *Server) ServeHTTP(w http.ResponseWriter, r *http.Request) {
