@@ -6,24 +6,24 @@ import (
 )
 
 type NamingService struct {
+	cfg NamingConfig
 }
 
-func NewNamingService() *NamingService {
-	return &NamingService{}
+func NewNamingService(cfg NamingConfig) *NamingService {
+	return &NamingService{cfg}
 }
 
-func (n NamingService) GetNewFilename(uploadedFilename string) string {
+func (n *NamingService) GetNewFilename(uploadedFilename string) string {
 	randomName := uuid.New().String()
 	fullName := randomName + filepath.Ext(uploadedFilename)
 	return fullName
 }
 
-func (n NamingService) GetFullFSPath(filename string) string {
-	//TODO implement me
-	panic("implement me")
+func (n *NamingService) GetFullFSPath(filename string) string {
+	return filepath.Join(n.cfg.FSRoot, filename)
 }
 
-func (n NamingService) GetURL(filename string) string {
+func (n *NamingService) GetURL(filename string) string {
 	//TODO implement me
 	panic("implement me")
 }
