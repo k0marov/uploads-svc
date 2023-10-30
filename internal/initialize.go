@@ -6,6 +6,7 @@ import (
 )
 
 func InitializeAndStart(cfg AppConfig) {
-	srv := NewServer()
+	namer := NewNamingService()
+	srv := NewServer(namer)
 	log.Print(http.ListenAndServe(cfg.HTTPServer.Host, srv))
 }

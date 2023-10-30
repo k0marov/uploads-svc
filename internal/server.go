@@ -7,7 +7,7 @@ import (
 	"net/http"
 )
 
-type StorageService interface {
+type INamingService interface {
 	// GetNewFilename uses uploadedFilename to preserve extension, if possible
 	GetNewFilename(uploadedFilename string) string
 	GetFullFSPath(filename string) string
@@ -15,11 +15,11 @@ type StorageService interface {
 }
 
 type Server struct {
-	r       *gin.Engine
-	storage StorageService
+	r     *gin.Engine
+	namer INamingService
 }
 
-func NewServer(storage StorageService) http.Handler {
+func NewServer(storage INamingService) http.Handler {
 	srv := &Server{gin.New(), storage}
 	//srv.r.MaxMultipartMemory = 8 << 20 // 8 MiB
 	srv.defineEndpoints()
@@ -44,13 +44,13 @@ func (s *Server) HandleUpload(c *gin.Context) {
 		}
 		return
 	}
-	newFilename := s.storage.GetNewFilename(gotFile.Filename)
-	err = c.SaveUploadedFile(gotFile, s.storage.GetFullFSPath(newFilename))
+	newFilename := s.namer.GetNewFilename(gotFile.Filename)
+	err = c.SaveUploadedFile(gotFile, s.namer.GetFullFSPath(newFilename))
 	if err != nil {
 		WriteErrorResponse(c.Writer, err)
 		return
 	}
-	c.String(http.StatusCreated, s.storage.GetURL(newFilename))
+	c.String(http.StatusCreated, s.namer.GetURL(newFilename))
 }
 
 func (s *Server) GetFileByName(c *gin.Context) {
