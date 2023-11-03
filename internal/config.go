@@ -6,7 +6,7 @@ import (
 )
 
 type HTTPServerConfig struct {
-	Host string `default:"127.0.0.1:8002"`
+	Host string `default:":8080"`
 }
 
 type NamingConfig struct {
