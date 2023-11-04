@@ -7,9 +7,9 @@ services:
     container_name: uploads-svc
     hostname: uploads-svc
     volumes:
-      - ${UPLOADS_IMAGES_DIR:-./images/}:/images
+      - ${UPLOADS_FILES_DIR:-./files/}:/files
     env_file: .env
     environment:
-      - UPLOADS_NAMING_FSROOT=/images
+      - UPLOADS_NAMING_FSROOT=/files
     ports:
       - "${UPLOADS_SVC_PORT:-8080}:8080"
