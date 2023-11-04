@@ -26,7 +26,7 @@ paths:
       description: |-
         Upload a file by including it in a multipart request's "file" field.
         Before saving on the server, a random name is generated, but file extension is preserved.
-        Endpoint returns a single string: full URL from which the file can be downloaded.
+        Returns full URL for accessing the uploaded file.
       parameters:
       - description: File that you want to upload. Size limits are defined in config
         in: formData

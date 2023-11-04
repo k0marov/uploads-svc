@@ -21,7 +21,7 @@ const docTemplate = `{
     "paths": {
         "/uploads/": {
             "post": {
-                "description": "Upload a file by including it in a multipart request's \"file\" field.\nBefore saving on the server, a random name is generated, but file extension is preserved.\nEndpoint returns a single string: full URL from which the file can be downloaded.",
+                "description": "Upload a file by including it in a multipart request's \"file\" field.\nBefore saving on the server, a random name is generated, but file extension is preserved.\nReturns full URL for accessing the uploaded file.",
                 "produces": [
                     "text/plain"
                 ],
