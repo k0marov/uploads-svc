@@ -39,7 +39,6 @@ func NewServer(svc IUploadService) http.Handler {
 //	@contact.email	sam@skomarov.com
 
 // @host		localhost:8080
-// @BasePath	/api/v1
 // @schemes     https http
 func (s *Server) defineEndpoints() {
 	s.r.GET("/swagger/*any", ginSwagger.WrapHandler(swaggerFiles.Handler))
@@ -58,7 +57,7 @@ func (s *Server) defineEndpoints() {
 //		@Param	        name path string true "filename to download"
 //		@Success		200			file 	file	"full file contents"
 //		@Failure 		404
-//		@Router			/uploads/{name} [get]
+//		@Router			/api/v1/uploads/{name} [get]
 func DownloadFile(w http.ResponseWriter, r *http.Request) {
 	// just a stub for swaggo generator, see defineEndpoints()
 }
@@ -78,7 +77,7 @@ type UploadedResponse struct {
 //	@Param	        file formData file true "File that you want to upload. Size limits are defined in config"
 //	@Success		201			{object} 	UploadedResponse	"URL from which you can download the uploaded file."
 //	@Failure 		413 		{object} 	ClientError "When uploaded image exceeds max size limit."
-//	@Router			/uploads/ [post]
+//	@Router			/api/v1/uploads/ [post]
 func (s *Server) HandleUpload(c *gin.Context) {
 	// limits request size
 	c.Request.Body = http.MaxBytesReader(c.Writer, c.Request.Body, s.svc.MaxFileSizeBytes())
