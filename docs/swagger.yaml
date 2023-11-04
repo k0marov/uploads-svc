@@ -1,4 +1,3 @@
-basePath: /api/v1
 definitions:
   internal.ClientError:
     properties:
@@ -21,7 +20,7 @@ info:
   title: uploads-svc
   version: "1.0"
 paths:
-  /uploads/:
+  /api/v1/uploads/:
     post:
       description: |-
         Upload a file by including it in a multipart request's "file" field.
@@ -47,7 +46,7 @@ paths:
       summary: Upload a file
       tags:
       - uploads
-  /uploads/{name}:
+  /api/v1/uploads/{name}:
     get:
       description: |-
         Serves a file by its name.

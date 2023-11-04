@@ -19,7 +19,7 @@ const docTemplate = `{
     "host": "{{.Host}}",
     "basePath": "{{.BasePath}}",
     "paths": {
-        "/uploads/": {
+        "/api/v1/uploads/": {
             "post": {
                 "description": "Upload a file by including it in a multipart request's \"file\" field.\nBefore saving on the server, a random name is generated, but file extension is preserved.\nReturns full URL for accessing the uploaded file.",
                 "produces": [
@@ -54,7 +54,7 @@ const docTemplate = `{
                 }
             }
         },
-        "/uploads/{name}": {
+        "/api/v1/uploads/{name}": {
             "get": {
                 "description": "Serves a file by its name.\nGenerally, you wouldn't construct requests to this endpoint yourself,\nbecause full URLs are returned from the upload endpoint.",
                 "tags": [
@@ -109,7 +109,7 @@ const docTemplate = `{
 var SwaggerInfo = &swag.Spec{
 	Version:          "1.0",
 	Host:             "localhost:8080",
-	BasePath:         "/api/v1",
+	BasePath:         "",
 	Schemes:          []string{"https", "http"},
 	Title:            "uploads-svc",
 	Description:      "An API for uploading and serving files.",
