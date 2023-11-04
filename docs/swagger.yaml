@@ -1,0 +1,75 @@
+basePath: /api/v1
+definitions:
+  internal.ClientError:
+    properties:
+      message:
+        type: string
+    type: object
+  internal.UploadedResponse:
+    properties:
+      url:
+        example: localhost:8080/api/v1/uploads/afc5a4eb-8dd1-4df0-a3c4-6c2703a3dcb7.png
+        type: string
+    type: object
+host: localhost:8080
+info:
+  contact:
+    email: sam@skomarov.com
+    name: Sam Komarov
+    url: github.com/k0marov
+  description: An API for uploading and serving files.
+  title: uploads-svc
+  version: "1.0"
+paths:
+  /uploads/:
+    post:
+      description: |-
+        Upload a file by including it in a multipart request's "file" field.
+        Before saving on the server, a random name is generated, but file extension is preserved.
+        Endpoint returns a single string: full URL from which the file can be downloaded.
+      parameters:
+      - description: File that you want to upload. Size limits are defined in config
+        in: formData
+        name: file
+        required: true
+        type: file
+      produces:
+      - text/plain
+      responses:
+        "201":
+          description: URL from which you can download the uploaded file.
+          schema:
+            $ref: '#/definitions/internal.UploadedResponse'
+        "413":
+          description: When uploaded image exceeds max size limit.
+          schema:
+            $ref: '#/definitions/internal.ClientError'
+      summary: Upload a file
+      tags:
+      - uploads
+  /uploads/{name}:
+    get:
+      description: |-
+        Serves a file by its name.
+        Generally, you wouldn't construct requests to this endpoint yourself,
+        because full URLs are returned from the upload endpoint.
+      parameters:
+      - description: filename to download
+        in: path
+        name: name
+        required: true
+        type: string
+      responses:
+        "200":
+          description: full file contents
+          schema:
+            type: file
+        "404":
+          description: Not Found
+      summary: Serves a file by its name
+      tags:
+      - uploads
+schemes:
+- https
+- http
+swagger: "2.0"
